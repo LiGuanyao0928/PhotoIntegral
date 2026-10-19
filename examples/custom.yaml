@@ -1,0 +1,51 @@
+# 自定义整理方案示例
+# 用法：photointegral plan -c examples/custom.yaml -o plan.json
+#
+# 可以先加载一个预设，再追加方案和自己的规则。
+preset: basic
+
+strategies:
+  - {name: location, level: country, prefix: 足迹}       # prefix 改顶层文件夹名
+  - {name: events, gap_hours: 12, min_photos: 30}
+  - {name: media_type, types: [screenshot, video, favorite]}
+
+# 自定义规则：when 条件成立就放进 album。album 里可以用 {字段}。
+# 可用字段：year month day hour weekday country city camera_model lens_model
+#   media_type orientation size_mb megapixels duration latitude longitude
+#   is_video is_screenshot is_selfie is_live is_burst is_portrait is_panorama
+#   is_favorite is_hidden persons labels keywords albums filename extension
+# 运算符：eq ne gt gte lt lte between in not_in contains not_contains regex exists
+# 组合：all（全部满足） any（任一满足） not（取反）
+rules_prefix: 我的分类
+rules:
+  - album: "旅行/{year} {country}"
+    when:
+      all:
+        - {field: country, op: exists}
+        - {field: country, op: not_in, value: [中国, China]}
+
+  - album: "家人/{year}"
+    when:
+      any:
+        - {field: persons, op: contains, value: 妈妈}
+        - {field: persons, op: contains, value: 爸爸}
+
+  - album: 美食
+    when: {field: labels, op: contains, value: Food}   # 照片 App 自动识别的标签
+
+  - album: "周末/{year}-{month:02d}"
+    when: {field: weekday, op: gte, value: 6}
+
+  - album: 夜景
+    when:
+      all:
+        - {field: hour, op: between, value: [19, 23]}
+        - {field: is_video, op: eq, value: false}
+
+  - album: 微信与保存的图片
+    when:
+      all:
+        - {field: camera_model, op: exists, value: false}
+        - {field: is_screenshot, op: eq, value: false}
+        - {field: is_video, op: eq, value: false}
+    stop: true    # 命中后这张照片不再匹配后面的规则

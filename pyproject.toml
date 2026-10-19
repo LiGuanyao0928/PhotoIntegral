@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "photointegral"
+version = "0.1.0"
+description = "整理 iPhone 相册：按日期、地点、类型、人物、事件分相簿，找重复/相似照片，支持自定义规则"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["Pillow>=9.1", "PyYAML>=6"]
+
+[project.optional-dependencies]
+macos = ["osxphotos>=0.68", "photoscript>=0.3"]
+heic = ["pillow-heif>=0.13"]
+
+[project.scripts]
+photointegral = "photointegral.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["photointegral*"]
